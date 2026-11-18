@@ -221,7 +221,7 @@ def download_zip(ids: str = Query(...)):
     if not used:
         zip_path.unlink()
         raise HTTPException(404, "No hay documentos firmados para descargar")
-    return FileResponse(zip_path, media_type="application/zip", filename="documentos_firmados.zip",
+    return FileResponse(zip_path, media_type="application/zip", filename="certificados_firmados.zip",
                         background=BackgroundTask(zip_path.unlink, missing_ok=True))
 
 
