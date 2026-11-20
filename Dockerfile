@@ -4,9 +4,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends libreoffice-wri
     fonts-liberation2 fonts-crosextra-carlito fonts-crosextra-caladea \
     && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
-COPY requirements.txt .
+COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-COPY app.py .
+COPY backend/app.py .
 ENV PYTHONUNBUFFERED=1
 # CORS origin is scheme+host only (no /APP- path); override on the host if the frontend moves.
 ENV ALLOWED_ORIGINS=https://brandonalexisdev22.github.io

@@ -37,7 +37,7 @@ Desarrollo con recarga en caliente: además del backend, `cd frontend && npm run
 ## Despliegue (beta)
 El backend guarda archivos temporales entre peticiones y usa LibreOffice, así que el frontend (GitHub Pages) y el backend se despliegan por separado:
 
-1. **Backend** (Render, Railway, Fly… cualquier host Docker): imagen en `backend/Dockerfile` (incluye LibreOffice, escucha en `$PORT`). Una sola instancia (los archivos viven en su disco). `ALLOWED_ORIGINS` ya viene en la imagen como `https://brandonalexisdev22.github.io` (el origen no lleva la ruta `/APP-`).
+1. **Backend** (Render, Railway, Fly… cualquier host Docker): imagen en `Dockerfile` de la raíz (Render: Root Directory vacío, Dockerfile Path `./Dockerfile`; incluye LibreOffice, escucha en `$PORT`). Una sola instancia (los archivos viven en su disco). `ALLOWED_ORIGINS` ya viene en la imagen como `https://brandonalexisdev22.github.io` (el origen no lleva la ruta `/APP-`).
 2. **Frontend** (GitHub Pages): en el repo, *Settings → Pages → Source* = **GitHub Actions**, y en *Settings → Secrets and variables → Actions → Variables* crea `VITE_API_URL` = URL del backend (sin `/` final). Cada push a `main` publica en https://brandonalexisdev22.github.io/APP-/ con `.github/workflows/pages.yml`.
 
 ## Pruebas
