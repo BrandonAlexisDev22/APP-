@@ -17,6 +17,7 @@ import zipfile
 from contextlib import asynccontextmanager
 from pathlib import Path
 
+import mammoth
 import pymupdf as fitz
 from fastapi import FastAPI, File, HTTPException, Query, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -57,8 +58,9 @@ async def lifespan(_):
 
 app = FastAPI(title="Firma masiva", lifespan=lifespan)
 # Frontend hosted elsewhere (e.g. GitHub Pages) needs CORS; comma-separated origins.
-if origins := os.getenv("ALLOWED_ORIGINS"):
-    app.add_middleware(CORSMiddleware, allow_origins=origins.split(","), allow_methods=["*"], allow_headers=["*"])
+# CORS origin is scheme+host only (no /APP- path).
+origins = os.getenv("ALLOWED_ORIGINS", "https://brandonalexisdev22.github.io")
+app.add_middleware(CORSMiddleware, allow_origins=origins.split(","), allow_methods=["*"], allow_headers=["*"])
 
 
 def doc_dir(doc_id: str) -> Path:
@@ -68,7 +70,30 @@ def doc_dir(doc_id: str) -> Path:
     return d
 
 
+def docx_to_pdf_pure(src: Path):
+    """Fallback without LibreOffice (e.g. Render native Python): DOCX -> HTML -> PDF.
+    shortcut: simplified layout (no headers/footers/columns), install LibreOffice for exact fidelity."""
+    try:
+        with src.open("rb") as f:
+            html = mammoth.convert_to_html(f).value
+        story = fitz.Story(html=html or "<p></p>", user_css="body{font-family:sans-serif;font-size:11pt}")
+        writer = fitz.DocumentWriter(str(src.with_suffix(".pdf")))
+        page, more = fitz.paper_rect("a4"), True
+        while more:
+            dev = writer.begin_page(page)
+            more, _ = story.place(page + (72, 72, -72, -72))
+            story.draw(dev)
+            writer.end_page()
+        writer.close()
+    except Exception:
+        raise HTTPException(422, "No se pudo convertir el documento Word a PDF")
+
+
 def word_to_pdf(src: Path):
+    if not shutil.which(SOFFICE):
+        if src.suffix == ".doc":
+            raise HTTPException(422, "Los archivos .doc no se admiten en este servidor; guárdalo como .docx")
+        return docx_to_pdf_pure(src)
     # Own LibreOffice profile per conversion so parallel uploads don't lock each other.
     profile = src.parent / "lo-profile"
     try:

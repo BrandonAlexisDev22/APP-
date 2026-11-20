@@ -1,5 +1,6 @@
 import base64
 import io
+import shutil
 import subprocess
 import zipfile
 
@@ -8,6 +9,7 @@ import pytest
 from fastapi.testclient import TestClient
 from PIL import Image
 
+import app as app_module
 from app import app
 
 client = TestClient(app)
@@ -85,6 +87,25 @@ def test_pdf_portrait_and_rotated_and_zip():
     assert names == ["contrato_firmado.pdf", "contrato_firmado (2).pdf"]
 
 
+def minimal_docx(text: str) -> bytes:
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w") as z:
+        z.writestr("[Content_Types].xml", '<?xml version="1.0"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>')
+        z.writestr("_rels/.rels", '<?xml version="1.0"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="r1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>')
+        z.writestr("word/document.xml", f'<?xml version="1.0"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:r><w:t>{text}</w:t></w:r></w:p></w:body></w:document>')
+    return buf.getvalue()
+
+
+def test_docx_without_libreoffice(monkeypatch):
+    monkeypatch.setattr(app_module, "SOFFICE", "no-existe-soffice")
+    d = upload("carta.docx", minimal_docx("Hola documento de prueba")).json()
+    assert d["format"] == "docx" and d["pages"] == 1
+    assert "Hola documento" in fitz.open(stream=client.get(f"/api/documents/{d['id']}/pdf").content)[0].get_text()
+    check_placement(d["id"], {"page": 0, "x": 0.2, "y": 0.5, "w": 0.4, "h": 0})
+    assert upload("x.doc", b"\xd0\xcf\x11\xe0 fake").status_code == 422
+
+
+@pytest.mark.skipif(not shutil.which("soffice"), reason="LibreOffice no instalado")
 @pytest.mark.parametrize("fmt", ["docx", "doc"])
 def test_word_converted(tmp_path, fmt):
     (tmp_path / "carta.txt").write_text("Hola\nDocumento de prueba")

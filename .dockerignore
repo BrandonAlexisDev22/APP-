@@ -1,4 +1,0 @@
-# Only the backend goes into the image.
-*
-!backend/requirements.txt
-!backend/app.py
