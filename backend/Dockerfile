@@ -8,4 +8,6 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY app.py .
 ENV PYTHONUNBUFFERED=1
+# CORS origin is scheme+host only (no /APP- path); override on the host if the frontend moves.
+ENV ALLOWED_ORIGINS=https://brandonalexisdev22.github.io
 CMD uvicorn app:app --host 0.0.0.0 --port ${PORT:-8000}
