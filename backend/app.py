@@ -1,4 +1,7 @@
-"""Firma masiva de documentos: API de carga, conversión, firma y descarga."""
+"""Firma masiva de documentos: API de carga, conversión, firma y descarga.
+
+Ejecutar localmente: uvicorn app:app --reload --port 8000
+"""
 import base64
 import io
 import json
@@ -28,6 +31,8 @@ TTL_SECONDS = int(os.getenv("TEMP_TTL_MINUTES", "120")) * 60
 MAX_FILE_BYTES = int(os.getenv("MAX_FILE_MB", "25")) * 1024 * 1024
 MAX_SIGNATURE_BYTES = 5 * 1024 * 1024
 SOFFICE = os.getenv("SOFFICE", "soffice")
+# Allowed formats and their magic bytes; Word files are converted to PDF with LibreOffice.
+FORMATS = {".pdf": b"%PDF", ".docx": b"PK", ".doc": b"\xd0\xcf\x11\xe0"}
 DATA.mkdir(parents=True, exist_ok=True)
 
 
@@ -63,7 +68,7 @@ def doc_dir(doc_id: str) -> Path:
     return d
 
 
-def docx_to_pdf(src: Path):
+def word_to_pdf(src: Path):
     # Own LibreOffice profile per conversion so parallel uploads don't lock each other.
     profile = src.parent / "lo-profile"
     try:
@@ -73,23 +78,23 @@ def docx_to_pdf(src: Path):
             capture_output=True, timeout=180, check=True,
         )
     except (subprocess.SubprocessError, OSError):
-        raise HTTPException(422, "No se pudo convertir el DOCX a PDF")
+        raise HTTPException(422, "No se pudo convertir el documento Word a PDF")
     finally:
         shutil.rmtree(profile, ignore_errors=True)
     if not src.with_suffix(".pdf").exists():
-        raise HTTPException(422, "No se pudo convertir el DOCX a PDF")
+        raise HTTPException(422, "No se pudo convertir el documento Word a PDF")
 
 
 @app.post("/api/documents")
 def upload_document(file: UploadFile = File(...)):
     name = Path(file.filename or "documento").name
     ext = Path(name).suffix.lower()
-    if ext not in (".pdf", ".docx"):
-        raise HTTPException(400, "Formato no permitido: solo PDF o DOCX")
+    if ext not in FORMATS:
+        raise HTTPException(400, "Formato no permitido: solo PDF, DOCX o DOC")
     data = file.file.read(MAX_FILE_BYTES + 1)
     if len(data) > MAX_FILE_BYTES:
         raise HTTPException(413, f"El archivo supera {MAX_FILE_BYTES // 1024 // 1024} MB")
-    if not data.startswith(b"%PDF" if ext == ".pdf" else b"PK"):
+    if not data.startswith(FORMATS[ext]):
         raise HTTPException(400, f"El contenido no corresponde a un archivo {ext[1:].upper()} válido")
 
     doc_id = uuid.uuid4().hex
@@ -97,8 +102,8 @@ def upload_document(file: UploadFile = File(...)):
     d.mkdir()
     try:
         (d / f"original{ext}").write_bytes(data)
-        if ext == ".docx":
-            docx_to_pdf(d / "original.docx")
+        if ext != ".pdf":
+            word_to_pdf(d / f"original{ext}")
         try:
             with fitz.open(d / "original.pdf") as pdf:
                 if pdf.needs_pass:

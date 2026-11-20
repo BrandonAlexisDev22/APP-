@@ -1,9 +1,9 @@
 # Firma masiva de documentos
 
-Carga PDF/DOCX → ubica la firma → dibuja o sube la firma → firma todo el lote → descarga (individual o ZIP).
+Carga PDF/Word (DOCX, DOC) → ubica la firma → dibuja o sube la firma → firma todo el lote → descarga (individual o ZIP).
 
 ## Requisitos
-- Python 3.10+, Node 20+, LibreOffice (`soffice` en el PATH) para convertir DOCX.
+- Python 3.10+, Node 20+, LibreOffice (`soffice` en el PATH) para convertir Word (DOCX/DOC).
 
 ## Instalación
 ```bash
@@ -29,7 +29,7 @@ Desarrollo con recarga en caliente: además del backend, `cd frontend && npm run
 | `ALLOWED_ORIGINS` | — | Orígenes permitidos por CORS, separados por coma (frontend en otro dominio) |
 
 ## Cómo funciona
-- Cada documento se guarda en una carpeta temporal; los DOCX se convierten a PDF con LibreOffice **al subirlos**, así el visor y el motor de firma usan exactamente el mismo PDF.
+- Cada documento se guarda en una carpeta temporal; los Word (DOCX/DOC) se convierten a PDF con LibreOffice **al subirlos**, así el visor y el motor de firma usan exactamente el mismo PDF.
 - La posición se guarda como coordenadas relativas (0–1) a la página visible (respeta rotación y CropBox); PyMuPDF inserta la firma manteniendo proporciones y centrada en el recuadro.
 - Cada documento se firma en una petición independiente: un error no detiene el lote y el progreso es real. El original nunca se modifica (`signed.pdf` es un archivo aparte).
 - Si la firma PNG no tiene transparencia, el fondo claro se vuelve transparente automáticamente.

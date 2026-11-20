@@ -46,12 +46,12 @@ export default function App() {
     const queue = files.map((file, i) => ({ file, key: Date.now() + i }))
     setUploads((u) => [...u, ...queue.map(({ file, key }) => ({ key, name: file.name }))])
     const fail = (key: number, error: string) => setUploads((u) => u.map((x) => (x.key === key ? { ...x, error } : x)))
-    // A few at a time: DOCX conversion with LibreOffice is CPU-heavy.
+    // A few at a time: Word conversion with LibreOffice is CPU-heavy.
     const worker = async () => {
       for (let item; (item = queue.shift()); ) {
         const { file, key } = item
         const ext = file.name.split('.').pop()?.toLowerCase()
-        if (ext !== 'pdf' && ext !== 'docx') fail(key, 'Formato no permitido: solo PDF o DOCX')
+        if (!['pdf', 'docx', 'doc'].includes(ext ?? '')) fail(key, 'Formato no permitido: solo PDF, DOCX o DOC')
         else if (file.size > MAX_FILE_MB * 1024 * 1024) fail(key, `El archivo supera ${MAX_FILE_MB} MB`)
         else if (file.size === 0) fail(key, 'El archivo está vacío')
         else
@@ -193,7 +193,7 @@ function UploadStep({ docs, uploads, onFiles, onRemove, onDismiss }: {
   const [over, setOver] = useState(false)
   return (
     <>
-      <StepTitle title="Cargar documentos" text={`Archivos PDF o DOCX, hasta ${MAX_FILE_MB} MB cada uno. Los DOCX se convierten a PDF automáticamente.`} />
+      <StepTitle title="Cargar documentos" text={`Archivos PDF o Word (DOCX, DOC), hasta ${MAX_FILE_MB} MB cada uno. Los Word se convierten a PDF automáticamente.`} />
       <label
         onDragOver={(e) => {
           e.preventDefault()
@@ -215,7 +215,7 @@ function UploadStep({ docs, uploads, onFiles, onRemove, onDismiss }: {
         <span className="font-medium text-slate-700">Arrastra y suelta tus archivos aquí</span>
         <span className="mt-1 text-sm text-slate-500">o</span>
         <span className="btn-primary mt-2">Seleccionar archivos</span>
-        <input type="file" multiple accept=".pdf,.docx" className="hidden"
+        <input type="file" multiple accept=".pdf,.docx,.doc" className="hidden"
           onChange={(e) => {
             onFiles([...(e.target.files ?? [])])
             e.target.value = ''

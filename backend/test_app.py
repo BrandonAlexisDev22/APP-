@@ -4,6 +4,7 @@ import subprocess
 import zipfile
 
 import pymupdf as fitz
+import pytest
 from fastapi.testclient import TestClient
 from PIL import Image
 
@@ -84,18 +85,21 @@ def test_pdf_portrait_and_rotated_and_zip():
     assert names == ["contrato_firmado.pdf", "contrato_firmado (2).pdf"]
 
 
-def test_docx_converted(tmp_path):
+@pytest.mark.parametrize("fmt", ["docx", "doc"])
+def test_word_converted(tmp_path, fmt):
     (tmp_path / "carta.txt").write_text("Hola\nDocumento de prueba")
-    subprocess.run(["soffice", "--headless", "--convert-to", "docx", "--outdir", str(tmp_path),
+    target = "doc:MS Word 97" if fmt == "doc" else fmt
+    subprocess.run(["soffice", "--headless", "--convert-to", target, "--outdir", str(tmp_path),
                     str(tmp_path / "carta.txt")], check=True, capture_output=True, timeout=180)
-    d = upload("carta.docx", (tmp_path / "carta.docx").read_bytes()).json()
-    assert d["format"] == "docx" and d["pages"] == 1
+    d = upload(f"carta.{fmt}", (tmp_path / f"carta.{fmt}").read_bytes()).json()
+    assert d["format"] == fmt and d["pages"] == 1
     check_placement(d["id"], {"page": 0, "x": 0.2, "y": 0.5, "w": 0.4, "h": 0})
 
 
 def test_validation_and_isolation():
     assert upload("x.txt", b"hola").status_code == 400
     assert upload("x.pdf", b"PK fake").status_code == 400
+    assert upload("x.doc", b"PK fake").status_code == 400
     assert upload("x.pdf", b"%PDF-1.4 garbage").status_code == 422
     assert client.post("/api/documents/" + "0" * 32 + "/sign",
                        json={"page": 0, "x": 0, "y": 0, "w": 0.1, "h": 0.1, "signature": signature_png()}).status_code == 404

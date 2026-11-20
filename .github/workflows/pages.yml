@@ -23,6 +23,8 @@ jobs:
           node-version: 22
           cache: npm
           cache-dependency-path: frontend/package-lock.json
+      - name: Require backend URL
+        run: test -n "${{ vars.VITE_API_URL }}" || { echo "::error::Define la variable VITE_API_URL (Settings → Secrets and variables → Actions → Variables)"; exit 1; }
       - run: npm ci && npm run build
         working-directory: frontend
         env:

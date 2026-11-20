@@ -4,7 +4,7 @@ export type Placement = Box & { page: number } // page is 0-based
 export type Doc = {
   id: string
   name: string
-  format: 'pdf' | 'docx'
+  format: 'pdf' | 'docx' | 'doc'
   size: number
   pages: number
   placement?: Placement
