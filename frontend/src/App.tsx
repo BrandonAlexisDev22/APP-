@@ -27,6 +27,7 @@ const adapt = (t: Template, doc: Doc): Placement => ({
 
 export default function App() {
   const [step, setStep] = useState(0)
+  const [logoOk, setLogoOk] = useState(true)
   const [docs, setDocs] = useState<Doc[]>([])
   const [uploads, setUploads] = useState<Upload[]>([])
   const [signature, setSignatureRaw] = useState<string | null>(null)
@@ -91,22 +92,27 @@ export default function App() {
 
   return (
     <div className="min-h-screen">
-      <header className="border-b border-slate-200 bg-white">
+      <header className="bg-brand-600 text-white">
         <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-4 md:flex-row md:items-center md:justify-between">
-          <h1 className="text-lg font-semibold text-slate-900">Signify <span className="ml-1 rounded bg-amber-100 px-1.5 py-0.5 align-middle text-xs font-medium text-amber-800">BETA</span></h1>
+          <h1 className="flex items-center gap-3 text-lg font-semibold">
+            {/* Drop the company logo at frontend/public/logo.png; falls back to the name. */}
+            {logoOk ? <img src="logo.png" alt="Valor" className="h-8" onError={() => setLogoOk(false)} /> : <span className="text-2xl font-bold">Valor</span>}
+            <span className="border-l border-white/40 pl-3 font-medium">Firma masiva</span>
+            <span className="rounded bg-lime px-1.5 py-0.5 text-xs font-bold text-brand-900">BETA</span>
+          </h1>
           <nav className="flex flex-wrap gap-1">
             {STEPS.map((s, i) => (
               <button
                 key={s}
                 disabled={!canGo(i)}
                 onClick={() => setStep(i)}
-                className={`flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm disabled:opacity-40 ${
-                  step === i ? 'bg-indigo-50 font-medium text-indigo-700' : 'text-slate-600 hover:bg-slate-100'
+                className={`flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium disabled:opacity-50 ${
+                  step === i ? 'bg-white text-brand-700' : 'text-white hover:bg-white/15'
                 }`}
               >
                 <span
                   className={`flex h-5 w-5 items-center justify-center rounded-full text-xs ${
-                    step === i ? 'bg-indigo-600 text-white' : 'bg-slate-200 text-slate-600'
+                    step === i ? 'bg-brand-600 text-white' : 'bg-white/20 text-white'
                   }`}
                 >
                   {i + 1}
@@ -116,6 +122,7 @@ export default function App() {
             ))}
           </nav>
         </div>
+        <div className="brand-stripe h-1" />
       </header>
 
       <main className="mx-auto max-w-7xl px-4 py-6">
@@ -169,7 +176,7 @@ export default function App() {
 function StepTitle({ title, text }: { title: string; text: string }) {
   return (
     <div className="mb-5">
-      <h2 className="text-xl font-semibold text-slate-900">{title}</h2>
+      <h2 className="text-2xl font-bold text-brand-900">{title}</h2>
       <p className="mt-1 text-sm text-slate-500">{text}</p>
     </div>
   )
@@ -206,7 +213,7 @@ function UploadStep({ docs, uploads, onFiles, onRemove, onDismiss }: {
           onFiles([...e.dataTransfer.files])
         }}
         className={`flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-6 py-12 text-center transition ${
-          over ? 'border-indigo-500 bg-indigo-50' : 'border-slate-300 bg-white hover:border-indigo-400'
+          over ? 'border-brand-500 bg-brand-50' : 'border-slate-300 bg-white hover:border-brand-400'
         }`}
       >
         <svg className="mb-3 h-10 w-10 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -269,7 +276,7 @@ function DocList({ docs, selected, onSelect, right }: {
       {docs.map((d) => (
         <li key={d.id}>
           <button onClick={() => onSelect(d.id)}
-            className={`flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm ${d.id === selected ? 'bg-indigo-50' : 'hover:bg-slate-50'}`}>
+            className={`flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm ${d.id === selected ? 'bg-brand-50' : 'hover:bg-slate-50'}`}>
             <FormatBadge format={d.format} />
             <span className="flex-1 truncate" title={d.name}>{d.name}</span>
             {right(d)}
@@ -384,7 +391,7 @@ function ProcessStep({ docs, signature, processing, selected, setSelected, onSig
   const statusLabel = (d: Doc) =>
     d.status === 'done' ? <span className="text-xs text-emerald-600">✓ Firmado</span>
     : d.status === 'error' ? <span className="text-xs text-red-600">Error</span>
-    : d.status === 'processing' ? <span className="animate-pulse text-xs text-indigo-600">Procesando…</span>
+    : d.status === 'processing' ? <span className="animate-pulse text-xs text-brand-600">Procesando…</span>
     : !d.placement ? <span className="text-xs text-amber-600">Sin ubicar</span>
     : <span className="text-xs text-slate-400">Pendiente</span>
 
@@ -416,7 +423,7 @@ function ProcessStep({ docs, signature, processing, selected, setSelected, onSig
           <span className="ml-auto text-sm text-slate-500">{finished} / {docs.length} procesados</span>
         </div>
         <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-100" role="progressbar" aria-valuenow={finished} aria-valuemax={docs.length}>
-          <div className={`h-full transition-all ${failed.length ? 'bg-amber-500' : 'bg-indigo-600'}`} style={{ width: `${(finished / docs.length) * 100}%` }} />
+          <div className={`h-full transition-all ${failed.length ? 'bg-amber-500' : 'bg-brand-600'}`} style={{ width: `${(finished / docs.length) * 100}%` }} />
         </div>
         {failed.length > 0 && (
           <ul className="mt-3 space-y-1 text-sm text-red-600">
@@ -432,7 +439,7 @@ function ProcessStep({ docs, signature, processing, selected, setSelected, onSig
               {statusLabel(d)}
               {d.status === 'done' && (
                 <a href={signedUrl(d)} download onClick={(e) => e.stopPropagation()}
-                  className="rounded px-1.5 text-indigo-600 hover:bg-indigo-100" aria-label={`Descargar ${d.name}`} title="Descargar">⬇</a>
+                  className="rounded px-1.5 text-brand-600 hover:bg-brand-100" aria-label={`Descargar ${d.name}`} title="Descargar">⬇</a>
               )}
             </>
           )} />

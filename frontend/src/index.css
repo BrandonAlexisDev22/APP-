@@ -1,8 +1,24 @@
 @import "tailwindcss";
 
+/* Valor+ palette, sampled from valormas.gov.co */
+@theme {
+  --font-sans: "Roboto", ui-sans-serif, system-ui, sans-serif;
+  --color-brand-50: #e8f5ee;
+  --color-brand-100: #c9e8d6;
+  --color-brand-400: #2fae68;
+  --color-brand-500: #00a14b;
+  --color-brand-600: #009444;
+  --color-brand-700: #007a38;
+  --color-brand-900: #0b4f2c;
+  --color-lime: #a9c934;
+  --color-cyan: #19b5d8;
+  --color-navy: #1b2a4e;
+}
+
 body { @apply bg-slate-50 text-slate-800 antialiased; }
 .checker { background: repeating-conic-gradient(#e2e8f0 0% 25%, #fff 0% 50%) 0 0 / 16px 16px; }
+.brand-stripe { background: linear-gradient(90deg, var(--color-navy) 0 25%, var(--color-cyan) 25% 50%, var(--color-lime) 50% 75%, var(--color-navy) 75%); }
 
-.btn-primary { @apply inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50; }
+.btn-primary { @apply inline-flex items-center justify-center gap-2 rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-brand-500 disabled:cursor-not-allowed disabled:opacity-50; }
 .btn-secondary { @apply inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50; }
 .btn-icon { @apply inline-flex h-8 min-w-8 items-center justify-center rounded-md border border-slate-300 bg-white px-2 text-sm text-slate-700 hover:bg-slate-50 disabled:opacity-40; }

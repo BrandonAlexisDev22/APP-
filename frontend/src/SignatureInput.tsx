@@ -69,7 +69,7 @@ export default function SignatureInput({ value, onChange }: { value: string | nu
             </div>
           </>
         ) : (
-          <label className="flex h-48 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-slate-300 text-sm text-slate-500 hover:border-indigo-400 hover:bg-indigo-50/40">
+          <label className="flex h-48 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-slate-300 text-sm text-slate-500 hover:border-brand-400 hover:bg-brand-50/40">
             <span className="font-medium text-slate-700">{value ? 'Reemplazar imagen' : 'Seleccionar imagen PNG'}</span>
             <span className="mt-1">Preferiblemente con fondo transparente (máx. 5 MB)</span>
             <input

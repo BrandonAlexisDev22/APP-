@@ -127,21 +127,21 @@ export default function PdfViewer({
       >
         {box && box.w > 0 && (
           <div
-            className={`absolute ${onBox ? 'cursor-move border-2 border-dashed border-indigo-500 bg-indigo-500/10' : ''}`}
+            className={`absolute ${onBox ? 'cursor-move border-2 border-dashed border-brand-500 bg-brand-500/10' : ''}`}
             style={{ left: `${box.x * 100}%`, top: `${box.y * 100}%`, width: `${box.w * 100}%`, height: `${box.h * 100}%` }}
             onPointerDown={start('move')}
           >
             {signature ? (
               <img src={signature} alt="Firma" draggable={false} className="pointer-events-none h-full w-full object-contain" />
             ) : (
-              <span className="pointer-events-none absolute inset-0 flex items-center justify-center text-xs font-medium text-indigo-600">
+              <span className="pointer-events-none absolute inset-0 flex items-center justify-center text-xs font-medium text-brand-600">
                 Firma
               </span>
             )}
             {onBox && (
               <div
                 aria-label="Redimensionar"
-                className="absolute -right-2 -bottom-2 h-4 w-4 cursor-nwse-resize rounded-sm border-2 border-white bg-indigo-600"
+                className="absolute -right-2 -bottom-2 h-4 w-4 cursor-nwse-resize rounded-sm border-2 border-white bg-brand-600"
                 onPointerDown={start('resize')}
               />
             )}
