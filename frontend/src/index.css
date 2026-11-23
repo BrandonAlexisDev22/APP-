@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* Valor+ palette, sampled from valormas.gov.co */
+/* Brand palette */
 @theme {
   --font-sans: "Roboto", ui-sans-serif, system-ui, sans-serif;
   --color-brand-50: #e8f5ee;

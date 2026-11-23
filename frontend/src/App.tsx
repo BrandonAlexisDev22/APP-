@@ -27,7 +27,6 @@ const adapt = (t: Template, doc: Doc): Placement => ({
 
 export default function App() {
   const [step, setStep] = useState(0)
-  const [logoOk, setLogoOk] = useState(true)
   const [docs, setDocs] = useState<Doc[]>([])
   const [uploads, setUploads] = useState<Upload[]>([])
   const [signature, setSignatureRaw] = useState<string | null>(null)
@@ -95,9 +94,7 @@ export default function App() {
       <header className="bg-brand-600 text-white">
         <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-4 md:flex-row md:items-center md:justify-between">
           <h1 className="flex items-center gap-3 text-lg font-semibold">
-            {/* Drop the company logo at frontend/public/logo.png; falls back to the name. */}
-            {logoOk ? <img src="logo.png" alt="Valor" className="h-8" onError={() => setLogoOk(false)} /> : <span className="text-2xl font-bold">Valor</span>}
-            <span className="border-l border-white/40 pl-3 font-medium">Firma masiva</span>
+            Firma masiva
             <span className="rounded bg-lime px-1.5 py-0.5 text-xs font-bold text-brand-900">BETA</span>
           </h1>
           <nav className="flex flex-wrap gap-1">
